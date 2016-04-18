@@ -1,0 +1,13 @@
+### IGNORE ###
+# ignore temp folder
+_tmp
+# ignore pyc files
+*.pyc
+# ignore .idea
+.idea
+# todos
+todo
+# archive
+*.rar
+# watches 
+.mayaSwatches

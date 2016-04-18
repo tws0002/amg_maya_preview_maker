@@ -1,0 +1,217 @@
+//**************************************************************************/
+// Copyright (c) 2015 Lex Darlog.
+// All rights reserved.
+//**************************************************************************/
+
+// Global transforms.
+float4x4 gTransform_V_IT : ViewInverseTranspose < string UIWidget="none";>;
+float4x4 gTransform_W : World < string UIWidget = "None"; >;
+float4x4 gTransform_W_IT : WorldInverseTranspose < string UIWidget = "None"; >;
+float4x4 gTransform_WVP : WorldViewProjection < string UIWidget = "None"; >;
+
+// Parameters
+float3 FrontColor : Diffuse
+<
+  string UIName =  "Front Color";
+  string UIWidget = "Color";
+> = {0.0f, 0.1f, 0.5f};
+
+float3 BackColor : Diffuse
+<
+  string UIName =  "Back Color";
+  string UIWidget = "Color";
+> = {1.0f, 0.3f, 0.0f};
+float Threshold <
+	string UIWidget = "slider";
+	string UIName = "Threshold (for 2nd mode)";
+	float UIMin = 0;
+	float UIMax = 0.3;
+> = 0.05;
+
+float3 FresnelColor : Diffuse
+<
+  string UIName =  "Fresnel Color";
+  string UIWidget = "Color";
+> = {1.0f, 1.0f, 1.0f};
+float FresnelPower <
+	string UIWidget = "slider";
+	string UIName = "Fresnel Power";
+	float UIMin = 0;
+	float UIMax = 2;
+> = 0.25f;
+float FresnelThreshold <
+	string UIWidget = "slider";
+	string UIName = "Fresnel Threshold";
+	float UIMin = -1;
+	float UIMax = 1;
+> = -0.1f;
+
+// bool showWireFrame < string UIName = "Show Wire";
+// > = true;
+
+// float3 wireColor : Diffuse
+// <
+//   string UIName =  "Wire Color";
+//   string UIWidget = "Color";
+// > = {0.0f, 0.0f, 0.5f};
+
+// Vertex shader input structure.
+struct appdata_flat
+{
+	float4 vertex : POSITION;
+};
+
+struct appdata_th
+{
+	float4 vertex : POSITION;
+	float4 normal : NORMAL;
+};
+
+// Vertex shader output structure.
+struct v2f_flat
+{
+	float4 pos : POSITION;
+};
+
+struct v2f_th
+{
+	float4 pos : POSITION;
+	half3 normal : TEXCOORD0;
+	half3 viewDir : TEXCOORD1;
+};
+
+// Vertex shader.
+v2f_flat vert_flat(appdata_flat v)
+{
+	v2f_flat o;
+	
+	// Transform the position from object space to clip space for output.
+	o.pos = mul(gTransform_WVP, v.vertex);
+	
+	return o;
+}
+
+v2f_th vert_th(appdata_th v)
+{
+	v2f_th o;
+	
+	// Transform the position from object space to clip space for output.
+	o.pos = mul(gTransform_WVP, v.vertex);
+	
+	// World-space normal:
+	o.normal = normalize(mul(gTransform_W_IT, v.normal).xyz);
+	
+	float4 Po = float4(v.vertex.xyz, 1.0f);
+	float3 Pw = mul(gTransform_W, Po).xyz;
+	o.viewDir = normalize(gTransform_V_IT[3].xyz - Pw);
+	
+	return o;
+}
+
+// Pixel shader.
+half4 frag_th(v2f_th i) : COLOR
+{
+	fixed facingRatio = dot(normalize(i.normal), normalize(i.viewDir)) + Threshold;
+	half4 clr = 1.0x;
+	clr.rgb = facingRatio > 0.0x ? FrontColor : BackColor;
+	return clr;
+}
+
+half4 frag_flat(v2f_flat i, uniform float3 SurfColor) : COLOR
+{
+	half4 clr = 1.0h;
+	clr.rgb = SurfColor;
+	return clr;
+}
+
+half4 frag_flat_fresnel(v2f_th i, uniform float3 SurfColor) : COLOR
+{
+	half4 clr = 1.0h;
+	half facingRatio = abs(
+		dot(normalize(i.normal), normalize(i.viewDir))
+	);
+	facingRatio = pow(saturate(facingRatio - FresnelThreshold), FresnelPower);
+	clr.rgb = lerp(FresnelColor, SurfColor, facingRatio);
+	return clr;
+}
+
+half4 frag_th_fresnel(v2f_th i) : COLOR
+{
+	half facingRatio = dot(normalize(i.normal), normalize(i.viewDir));
+	half4 clr = 1.0x;
+	half fres_mask = pow(
+		saturate(abs(facingRatio) - FresnelThreshold),
+		FresnelPower
+	);
+	half3 front_clr = lerp(FresnelColor, FrontColor, fres_mask);
+	clr.rgb = (facingRatio + Threshold) > 0.0h ? front_clr : BackColor;
+	return clr;
+}
+
+// Techniques.
+technique Simple
+{
+	pass frontFace
+	{
+		DepthFunc = LEqual;
+		DepthTestEnable = true;
+		CullFaceEnable = true;
+		VertexProgram = compile arbvp1 vert_flat();
+		FragmentProgram = compile arbfp1 frag_flat(FrontColor);
+	}
+	pass backFace
+	{
+		DepthFunc = Less;
+		DepthTestEnable = true;
+		CullFaceEnable = true;
+		CullMode = int(Front);
+		VertexProgram = compile arbvp1 vert_flat();
+		FragmentProgram = compile arbfp1 frag_flat(BackColor);
+	}
+}
+
+technique withThreshold
+{
+	pass p0
+	{
+		DepthFunc = LEqual;
+		DepthTestEnable = true;
+		CullFaceEnable = false;
+		VertexProgram = compile arbvp1 vert_th();
+		FragmentProgram = compile arbfp1 frag_th();
+	}
+}
+
+technique SimpleWithFresnel
+{
+	pass frontFace
+	{
+		DepthFunc = LEqual;
+		DepthTestEnable = true;
+		CullFaceEnable = true;
+		VertexProgram = compile arbvp1 vert_th();
+		FragmentProgram = compile arbfp1 frag_flat_fresnel(FrontColor);
+	}
+	pass backFace
+	{
+		DepthFunc = Less;
+		DepthTestEnable = true;
+		CullFaceEnable = true;
+		CullMode = int(Front);
+		VertexProgram = compile arbvp1 vert_flat();
+		FragmentProgram = compile arbfp1 frag_flat(BackColor);
+	}
+}
+
+technique withThresholdAndFresnel
+{
+	pass p0
+	{
+		DepthFunc = LEqual;
+		DepthTestEnable = true;
+		CullFaceEnable = false;
+		VertexProgram = compile arbvp1 vert_th();
+		FragmentProgram = compile arbfp1 frag_th_fresnel();
+	}
+}
+

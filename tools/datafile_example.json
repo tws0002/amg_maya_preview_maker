@@ -1,0 +1,73 @@
+{
+    "":"RENDER DATA",
+    "mayascene":"<path>",
+    "outfilename":"<filename>",
+    "outputdir":"<dir>",
+    "resolution":[1280, 720],
+    "engine":"XXX",
+        "":" 'ai' - arnold, 'blast' - Maya playblast, 'hw' - Maya hardware OGL",
+    "layer":"",
+    "ranges":[{"camera":"cam1",
+                "start":0,
+                  "end":100,
+                 "step":1,
+                 "orto":true},
+              {"camera":"cam2",
+                "start":101,
+                  "end":200,
+                 "step":1,
+                 "orto":false}
+             ],
+
+    "":"STAMP DATA",
+    "stamp": {
+        "":"top left",
+        "tl": [
+            ["Project","<project>"],
+            ["Artist","<username>"],
+            ["Date", "01.01.2016"]
+        ],
+        "":"top middle",
+        "tm": [],
+        "":"top right",
+        "tr": [],
+        "":"bottom left",
+        "bl": [
+            ["Sequence", "<EP000>"],
+            ["Shot","<sh0000>"],
+            ["Step", "<step>"],
+            ["Task","<taskname>"]
+        ],
+        "":"bottom muddle",
+        "bm": [
+            ["","EP000sh-0000"],
+            ["","v000"]
+        ],
+        "":"bottom right",
+        "br": [
+            ["Frame","{frame:4}"]
+        ]
+    },
+    "bg_color": [0,0,0,180],
+    "font": "<path\to\font\file.ttf>",
+    "font_size": 14,
+    "test": false,
+    "logo": true,
+    "backdrop":true,
+    "viewport_backdrop": false,
+
+    "":"FFMPEG DATA",
+    "ismove":false,
+    "movfile":"<path>",
+    "join_outputs":false,
+
+    "":"FILES DATA",
+    "mayadir":"",
+    "tmpdir":"c:\\temp",
+    "jpgfiles":[],
+    "group":0,
+
+    "":"SHOTGUN",
+    "context":null,
+    "outfiles":[]
+}
