@@ -24,17 +24,17 @@ def incName(name):
         next = nm + '1'
     return next + ext
 app_ffmpeg = None
-if os.getenv('CGRU_LOCATION'):
-    app_ffmpeg = os.path.join(os.getenv('CGRU_LOCATION'), 'bin', 'ffmpeg.exe')
-else:
-    conf = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json').replace('\\','/')
-    if os.path.exists(conf):
-        conf_data = json.load(open(conf))
-        app_ffmpeg = conf_data.get('ffmpeg_path')
-    if not app_ffmpeg:
-        self_ffmpeg = os.path.join(os.path.dirname(os.path.dirname(__file__)),'tools/bin/ffmpeg.exe')
-        if os.path.exists(self_ffmpeg):
-            app_ffmpeg = self_ffmpeg
+
+conf = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json').replace('\\','/')
+if os.path.exists(conf):
+    conf_data = json.load(open(conf))
+    app_ffmpeg = conf_data.get('ffmpeg_path')
+if not app_ffmpeg:
+    self_ffmpeg = os.path.join(os.path.dirname(os.path.dirname(__file__)),'tools/bin/ffmpeg.exe')
+    print self_ffmpeg
+    if os.path.exists(self_ffmpeg):
+        app_ffmpeg = self_ffmpeg
+
 if not app_ffmpeg:
     printer('FFMPEG not found', status.ERROR)
     sys.exit(1)
@@ -70,6 +70,7 @@ class Executor(QObject):
     def start(self, cmd):
         printer('Rendering MP4', status.ACTIVITY)
         time.sleep(0.5)
+        print '>'*10,cmd
         # printer('Execute command: %s' % cmd, status.MESSAGE)
         self.process = QProcess()
         self.process.setProcessChannelMode(QProcess.MergedChannels)
@@ -133,6 +134,7 @@ if __name__ == '__main__':
     while os.path.exists(outfile):
         outfile = incName(outfile)
     printer('OUT FILE ' + outfile)
+
     cmd = r'{ffmpeg} -y -r 24 -f image2 -s {width}x{height} -i {input} -vcodec libx264 -crf 25  {outdir}'.format(
         ffmpeg=app_ffmpeg,
         width=data["resolution"][0],

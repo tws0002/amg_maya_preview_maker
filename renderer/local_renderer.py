@@ -70,6 +70,8 @@ class ProcessMonitor(QMainWindow):
         self.out('Data file: %s' % datafile)
         if not paused:
             self.start()
+        else:
+            self.out('PRESS START TO BEGIN RENDER')
 
     def out(self, *msg):
         self.out_tb.append(' '.join([str(x) for x in msg]))
@@ -151,7 +153,7 @@ class ProcessMonitor(QMainWindow):
             cmd = self.cmds.pop(0)
             self.out('_'*50+'  '+datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S"))
             label = '%s (%s / %s)' % (cmd['message'],self.command_count- len(self.cmds), self.command_count)
-            # self.out(label)
+
             self.message_lb.setText(label)
             self.out(cmd['message'])
             # self.out(cmd['cmd'])
@@ -187,6 +189,7 @@ class ProcessMonitor(QMainWindow):
         if not isinstance(output, str):
             output = str(output)
         output = str(output).strip()
+        # print output
         if output:
             other = True
             act = re.match(status.ACTIVITY + '::(.+)', output.strip())
@@ -212,6 +215,7 @@ class ProcessMonitor(QMainWindow):
                 other = False
                 # return
             if other:
+                # pass
                 print output
 
 
@@ -251,6 +255,7 @@ class ProcessMonitor(QMainWindow):
         self.progres_pb.setValue(0)
 
     def clean_files(self):
+        return
         path = os.path.dirname(self.df)
         try:
             if os.path.exists(path):

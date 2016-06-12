@@ -5,19 +5,22 @@ result_message = 'RESULT::'
 error_message = 'ERROR::'
 warning_message = 'WARNING::'
 
+
 def join(*args):
     return '/'.join([str(x) for x in args]).replace('\\','/').replace('/','/')
 
+
 def join_video(files, output):
-    rend = os.path.join(os.path.dirname(__file__), 'renderer','join_video.py').replace('/','\\')
+    rend = os.path.join(os.path.dirname(__file__), 'renderer', 'join_video.py').replace('/', '\\')
     files = ' '.join(files)
     cmd = '{py} {renderer} -f {files} -o {output}'.format(
         py=pyexec,
         renderer=rend,
-        files = files,
+        files=files,
         output=output
     )
     res = subprocess.check_output(cmd)
+    # open('c:/cmd.txt', 'w').write('%s\n%s' % (cmd, res))
     f = re.findall(r"RESULT::(.*?)\|\|", str(res))
     if f:
         path = f[0].strip().replace('\\','/').replace('//','/').replace("'",'').replace('"','')
@@ -34,6 +37,8 @@ def join_images(files, output):
         output=output
     )
     res = subprocess.check_output(cmd)
+    # open('c:/cmd.txt', 'w').write('%s\n%s' % (cmd, res))
+    # os.startfile('c:/cmd.txt')
     f = re.findall(r"RESULT::(.*?)\|\|", str(res))
     if f:
         path = f[0].strip().replace('\\','/').replace('//','/').replace("'",'').replace('"','')
@@ -92,7 +97,7 @@ if __name__ == '__main__':
                     sys.exit(1)
                 else:
                     output_files.append(joined.strip())
-                    print ('Joined:',joined.strip() )
+                    print ('Joined:', joined.strip())
             else:
                 os.rename(join_movies_list[0], out_path)
                 output_files.append(out_path.strip())
@@ -101,18 +106,18 @@ if __name__ == '__main__':
             for img_files in join_images_list:
                 id, files = list(img_files.items())[0]
                 out_image = join(root, 'joined_%s_grp_%s.png' % (id, g))
-                if len(img_files)>1:
+                if len(files)>1:
                     if os.path.exists(out_image):
                         os.remove(out_image)
                     joined = join_images(files, out_image)
-                    if not joined:
+                    if not joined.strip():
                         print(error_message+'Error join images for %s' % datafile)
                         sys.exit(1)
                     else:
                         output_files.append(joined.strip())
                         print ('Joined', joined.strip())
                 else:
-                    joined =  out_image
+                    joined = out_image
                     os.rename(files[0], out_image)
                     output_files.append(joined.strip())
     result_files = []

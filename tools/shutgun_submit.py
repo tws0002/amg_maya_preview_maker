@@ -25,7 +25,7 @@ def publish_preview(src_path):
 
     sa = ShotgunAuthenticator()
     user = sa.create_script_user(api_script="Toolkit",
-                                 api_key="2062d7c5d64ad72552fb0e983bd25203a823580620410a56367ac491d325fc6f",
+                                 api_key="",
                                  host="https://animagrad.shotgunstudio.com")
     sgtk.set_authenticated_user(user)
 

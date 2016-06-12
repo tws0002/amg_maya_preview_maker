@@ -1,8 +1,7 @@
 import os, sys, argparse, tempfile, re
 
-amg = os.getenv('AMG_ROOT') or 'D:/work/amg/amg_pipeline'
-ffmpeg = os.path.join(amg, 'cgru', 'bin', 'ffmpeg')
-
+ffmpeg = os.path.join(os.path.dirname(os.path.dirname(__file__)),'tools','bin','ffmpeg.exe')
+print'FFMPEG', ffmpeg
 result_message = 'RESULT::'
 error_message = 'ERROR::'
 warning_message = 'WARNING::'
@@ -37,7 +36,7 @@ def incrementSaveName(path, padding=3):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='... saves many files together...')
+    parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output',
                         help='Output video')
     parser.add_argument('-f', '--file',
